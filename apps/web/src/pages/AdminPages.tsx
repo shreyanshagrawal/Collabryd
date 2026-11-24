@@ -59,15 +59,15 @@ export function AdminPage({
               className="bg-surface border border-border rounded-xl p-5 hover:border-primary transition-colors block shadow-sm"
               href="#/admin/users"
             >
-              <span className="text-xs text-muted block">Awaiting campus review</span>
+              <span className="text-xs text-muted block">Active students</span>
               <strong className="text-2xl sm:text-3xl font-display font-medium text-ink block mt-1">
                 {
                   (demo.people || []).filter(
-                    (person) => person.status === "Pending review",
+                    (person) => (person.status || "Active") === "Active",
                   ).length
                 }
               </strong>
-              <p className="text-xs text-muted mt-1">Student profiles pending approval</p>
+              <p className="text-xs text-muted mt-1">Verified campus members</p>
             </a>
             <a
               className="bg-surface border border-border rounded-xl p-5 hover:border-primary transition-colors block shadow-sm"
@@ -174,7 +174,6 @@ function StudentReview({ demo }: { demo: DemoData }) {
             }}
           >
             <option value="">All statuses</option>
-            <option>Pending review</option>
             <option>Active</option>
             <option>Suspended</option>
           </select>
@@ -205,15 +204,13 @@ function StudentReview({ demo }: { demo: DemoData }) {
               </div>
               <Badge>{person.status || "Active"}</Badge>
               <div className="flex flex-wrap items-center gap-2.5">
-                {person.status !== "Active" && person.status !== undefined ? (
+                {person.status === "Suspended" ? (
                   <button
                     className="inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-bold bg-transparent text-primary border border-input-border hover:bg-soft transition-colors cursor-pointer"
                     type="button"
                     onClick={() => demo.reviewStudent(person.id, "Active")}
                   >
-                    {person.status === "Suspended"
-                      ? "Restore access"
-                      : "Approve student"}
+                    Restore access
                   </button>
                 ) : (
                   <button
@@ -264,7 +261,7 @@ function StudentReview({ demo }: { demo: DemoData }) {
                 setSuspending(null);
               }}
             >
-              Suspend example profile
+              Suspend student profile
             </button>
           </div>
         </Dialog>

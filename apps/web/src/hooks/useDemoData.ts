@@ -81,11 +81,9 @@ function mapBackendStudent(student: FullProfile, currentUserId?: number): Person
     linkedinUrl: li || undefined,
     portfolioUrl: pf || undefined,
     status:
-      student.accountStatus === "ACTIVE"
-        ? "Active"
-        : student.accountStatus === "SUSPENDED"
-          ? "Suspended"
-          : "Pending review",
+      student.accountStatus === "SUSPENDED"
+        ? "Suspended"
+        : "Active",
   };
 }
 
@@ -267,7 +265,6 @@ export function useDemoData() {
         if (mapped.length > 0) setTeams(mapped);
       }
 
-      const mockReviews = getMockReviews();
       const peopleList: Person[] = [];
 
       if (adminUsers && Array.isArray(adminUsers) && adminUsers.length > 0) {
@@ -277,13 +274,6 @@ export function useDemoData() {
       }
 
       if (peopleList.length > 0) {
-        const hasPending = peopleList.some((p) => p.status === "Pending review");
-        if (!hasPending) {
-          const pendingWithReview = mockReviews[demoPendingStudent.id]
-            ? { ...demoPendingStudent, status: mockReviews[demoPendingStudent.id] }
-            : demoPendingStudent;
-          peopleList.push(pendingWithReview);
-        }
         setPeople(peopleList);
       }
 
@@ -943,7 +933,7 @@ export function useDemoData() {
       const action =
         status === "Suspended"
           ? adminApi.suspendUser(uid, "Moderated by administrator")
-          : adminApi.activateUser(uid, "Approved by administrator");
+          : adminApi.activateUser(uid, "Restored by administrator");
 
       action
         .then(() => {

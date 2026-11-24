@@ -420,7 +420,7 @@ async function seedRows(db: Pick<typeof database, "select" | "insert" | "update"
     {
       email: "neha.verma@campus.edu",
       systemRole: "STUDENT",
-      accountStatus: "PENDING_VERIFICATION",
+      accountStatus: "ACTIVE",
       profile: {
         displayName: "Neha Verma",
         bio: "Pre-final year IT student building full-stack applications. Looking for a high-energy hackathon team.",

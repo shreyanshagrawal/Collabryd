@@ -213,10 +213,10 @@ export const demoPendingStudent: Person = {
   year: "2nd year",
   skills: ["Figma"],
   interests: "Accessible products",
-  bio: "Enrolled design student awaiting initial campus verification.",
+  bio: "Enrolled design student building accessible products.",
   available: true,
   color: "sand",
-  status: "Pending review",
+  status: "Active",
 };
 export const demoNotices: Notice[] = [
   {

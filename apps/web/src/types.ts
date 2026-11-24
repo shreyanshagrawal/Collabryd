@@ -15,7 +15,7 @@ export interface Person {
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
-  status?: "Active" | "Pending review" | "Suspended";
+  status?: "Active" | "Suspended";
 }
 
 export interface Team {
