@@ -499,14 +499,14 @@ export const profilesApi = {
   async replaceInterests(interestIds: number[]) {
     return apiRequest<{ interests: FullProfile["interests"] }>("/profiles/me/interests", {
       method: "PUT",
-      body: JSON.stringify({ interestIds }),
+      body: JSON.stringify({ ids: interestIds }),
     });
   },
 
   async replacePreferredRoles(roleIds: number[]) {
     return apiRequest<{ preferredRoles: FullProfile["preferredRoles"] }>("/profiles/me/preferred-roles", {
       method: "PUT",
-      body: JSON.stringify({ roleIds }),
+      body: JSON.stringify({ ids: roleIds }),
     });
   },
 
@@ -825,6 +825,10 @@ export const adminApi = {
       body: JSON.stringify({ status, reason }),
     });
   },
+
+  async overrideProjectStatus(projectId: number, status: string, reason: string) {
+    return this.moderateProject(projectId, status, reason);
+  },
 };
 
 export const eventsApi = {
@@ -895,7 +899,7 @@ export const eventsApi = {
     }>
   ): Promise<BackendEvent> {
     return apiRequest<BackendEvent>(`/events/${slug}`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(data),
     });
   },
@@ -908,6 +912,13 @@ export const eventsApi = {
       method: "PATCH",
       body: JSON.stringify({ publication }),
     });
+  },
+
+  async updatePublication(
+    slug: string,
+    publication: "Draft" | "Published" | "Archived"
+  ): Promise<BackendEvent> {
+    return this.setPublication(slug, publication);
   },
 
   async delete(slug: string): Promise<{ deleted: boolean }> {

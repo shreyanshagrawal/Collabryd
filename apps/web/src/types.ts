@@ -16,6 +16,8 @@ export interface Person {
   linkedinUrl?: string;
   portfolioUrl?: string;
   status?: "Active" | "Suspended";
+  institution?: string;
+  courseProgram?: string;
 }
 
 export interface Team {

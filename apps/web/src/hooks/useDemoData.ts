@@ -85,6 +85,8 @@ function mapBackendStudent(student: FullProfile, currentUserId?: number): Person
       student.accountStatus === "SUSPENDED"
         ? "Suspended"
         : "Active",
+    institution: student.institution || "Collabryd Campus",
+    courseProgram: student.courseProgram || student.department || "B.Tech Computer Science",
   };
 }
 
@@ -546,10 +548,12 @@ export function useDemoData() {
     // Sync to backend asynchronously
     profilesApi
       .updateOwnProfile({
-        displayName: next.name,
-        bio: next.bio,
-        department: next.branch,
-        academicYear: next.year,
+        displayName: next.name?.trim() || "Student",
+        bio: next.bio || "",
+        department: next.branch || "Computer Science",
+        academicYear: next.year || "3rd Year",
+        institution: next.institution || profile.institution || "Collabryd Campus",
+        courseProgram: next.courseProgram || profile.courseProgram || "B.Tech Computer Science",
         availabilityStatus: next.available ? "AVAILABLE" : "BUSY",
         profileVisibility: "CAMPUS_ONLY",
       })
@@ -565,13 +569,16 @@ export function useDemoData() {
                 ? { skillId: found.skillId, proficiencyLevel: "INTERMEDIATE" as const }
                 : null;
             })
-            .filter(Boolean) as Array<{ skillId: number; proficiencyLevel: string }>;
+            .filter(Boolean) as Array<{ skillId: number; proficiencyLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" }>;
           if (matchedSkills.length > 0) {
             void profilesApi.replaceSkills(matchedSkills);
           }
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        const error = err as Error;
+        setFeedback(`Could not save profile to server: ${error.message || "Request failed"}`);
+      });
   }
 
   function createTeam(values: Omit<Team, "id" | "members" | "leaderId" | "status">) {
@@ -590,13 +597,18 @@ export function useDemoData() {
     notify("Your team is ready.", `#/teams/${newTeam.id}`);
     window.location.hash = `/teams/${newTeam.id}`;
 
+    const desc = values.description.trim().length >= 10
+      ? values.description.trim()
+      : `${values.description.trim()} — A new project team on Collabryd.`;
+    const summary = desc.slice(0, 180);
+
     // Sync to backend
     projectsApi
       .create({
-        title: values.name,
-        summary: values.description.slice(0, 180),
-        description: values.description,
-        category: values.domain || "Developer tools",
+        title: values.name.trim(),
+        summary,
+        description: desc,
+        category: values.domain?.trim() || "Developer tools",
         projectType: "HACKATHON",
         status: "OPEN",
         visibility: "CAMPUS_ONLY",
@@ -609,7 +621,10 @@ export function useDemoData() {
         );
         window.location.hash = `/teams/${created.projectId}`;
       })
-      .catch(() => {});
+      .catch((err) => {
+        const error = err as Error;
+        setFeedback(`Could not save team to server: ${error.message || "Request failed"}`);
+      });
 
     return "";
   }
@@ -829,14 +844,22 @@ export function useDemoData() {
 
     const pid = Number(id);
     if (Number.isFinite(pid)) {
+      const desc = values.description
+        ? (values.description.trim().length >= 10 ? values.description.trim() : `${values.description.trim()} — Collabryd project.`)
+        : undefined;
+
       projectsApi
         .update(pid, {
-          title: values.name,
-          description: values.description,
-          category: values.domain,
+          title: values.name?.trim(),
+          description: desc,
+          summary: desc ? desc.slice(0, 180) : undefined,
+          category: values.domain?.trim(),
           maxTeamSize: values.capacity,
         })
-        .catch(() => {});
+        .catch((err) => {
+          const error = err as Error;
+          setFeedback(`Could not save team changes to server: ${error.message || "Request failed"}`);
+        });
     }
 
     return "";
@@ -935,7 +958,7 @@ export function useDemoData() {
       current.map((person) => (person.id === id ? { ...person, status } : person))
     );
 
-    const uid = Number(id);
+    const uid = id === "you" && currentUserId ? currentUserId : Number(id);
     if (Number.isFinite(uid)) {
       const action =
         status === "Suspended"
@@ -1026,7 +1049,10 @@ export function useDemoData() {
           officialUrl: event.officialUrl,
           sourceUrl: event.sourceUrl,
         })
-        .catch(() => {});
+        .catch((err) => {
+          const error = err as Error;
+          setFeedback(`Could not save event to server: ${error.message || "Request failed"}`);
+        });
     } else {
       eventsApi
         .create({
@@ -1046,7 +1072,15 @@ export function useDemoData() {
           officialUrl: event.officialUrl,
           sourceUrl: event.sourceUrl,
         })
-        .catch(() => {});
+        .then((created) => {
+          setEvents((current) =>
+            current.map((item) => (item.id === event.id ? mapBackendEvent(created) : item))
+          );
+        })
+        .catch((err) => {
+          const error = err as Error;
+          setFeedback(`Could not create event on server: ${error.message || "Request failed"}`);
+        });
     }
 
     return "";
